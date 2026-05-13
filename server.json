@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.khan-ashifur/hooklayer",
+  "description": "Viral-content intelligence for AI agents. 7 MCP tools for analyzing TikTok creators, scoring hooks, remixing scripts, surfacing live trends, matching creator voice, predicting virality, and finding niche-fit viral templates. Flagship tool analyze_account returns a recommended_chain field that pre-fills the next 3 tool calls — agentic chaining without prompt engineering. Free tier: 100 lifetime credits at signup.",
+  "version": "1.0.0",
+  "status": "active",
+  "websiteUrl": "https://hooklayer.dev",
+  "repository": {
+    "source": "github",
+    "url": "https://github.com/khan-ashifur/hooklayer"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://hooklayer.dev/api/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer hl_live_* (free tier signup at https://hooklayer.dev/auth/signup) OR OAuth 2.1 access token (Dynamic Client Registration available at https://hooklayer.dev/oauth/register).",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

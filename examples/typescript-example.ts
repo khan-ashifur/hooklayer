@@ -49,15 +49,37 @@ async function main() {
   })
 
   const parsed = JSON.parse(analysis.content[0].text)
-  console.log(`✓ Viral DNA score: ${parsed.viral_dna.viral_dna_score}`)
+  console.log(`✓ Viral DNA score: ${parsed.viral_dna?.viral_dna_score ?? 'n/a'}`)
+
+  // Defensive: chain might be empty / undefined for very small accounts.
+  if (!parsed.recommended_chain || parsed.recommended_chain.length === 0) {
+    console.log('  (no recommended_chain returned — likely a very small account)')
+    await client.close()
+    return
+  }
+
   console.log(`  Recommended chain: ${parsed.recommended_chain.length} steps`)
 
-  // 3. Fire the recommended_chain automatically
+  // 3. Fire the recommended_chain automatically.
+  // Some steps have placeholder params (<<<USER_DRAFT>>>, <<<USER_HOOK>>>,
+  // <<<USER_SCRIPT>>>) the calling agent should substitute. Demo
+  // substitutes draft for match_voice.
   for (const step of parsed.recommended_chain) {
+    const params = { ...step.params }
+    if (typeof params.draft === 'string' && params.draft.includes('<<<USER_DRAFT>>>')) {
+      params.draft = 'I tracked where every hedge fund moved money this week'
+    }
+    if (typeof params.text === 'string' && params.text.includes('<<<USER_HOOK>>>')) {
+      params.text = '3 things I wish I knew about scaling B2B SaaS'
+    }
+    if (typeof params.script === 'string' && params.script.includes('<<<USER_SCRIPT>>>')) {
+      params.script = 'I tested 3 cold-email tools so you don\'t have to. Here\'s the winner...'
+    }
+
     console.log(`\n→ ${step.tool} (reason: ${step.reason})`)
     const result = await client.callTool({
       name: step.tool,
-      arguments: step.params,
+      arguments: params,
     })
     if (result.isError) {
       console.log(`  ✗ ${result.content[0].text}`)

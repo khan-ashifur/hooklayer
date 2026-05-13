@@ -2,6 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-2024--11--05-7c3aed)](https://modelcontextprotocol.io)
+[![Production](https://img.shields.io/badge/Status-Production%20Ready-success)](https://hooklayer.dev)
+[![Tools](https://img.shields.io/badge/MCP%20Tools-7-7c3aed)](https://hooklayer.dev/docs)
+[![OAuth](https://img.shields.io/badge/OAuth-2.1%20%2B%20PKCE-blue)](https://hooklayer.dev/.well-known/oauth-authorization-server)
 
 **Viral-content intelligence for AI agents.** Drop the Hooklayer MCP server into Claude Desktop, Cursor, n8n, or any HTTP MCP client and your agent gets 7 callable tools for scoring hooks, remixing viral videos, surfacing live trends, and (the flagship) analyzing TikTok creators with a `recommended_chain` that pre-fills the next 3 tool calls.
 
@@ -15,6 +18,20 @@
 
 ### Claude Desktop
 
+Claude Desktop doesn't natively support remote HTTP MCP servers — it needs the [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) bridge. Two ways to install:
+
+**Option 1 — Custom Connector (easiest, no config file edit)**
+
+In Claude's web/desktop UI: **Settings → Connectors → Add custom connector → paste this URL:**
+
+```
+https://hooklayer.dev/api/mcp
+```
+
+Claude.ai will walk you through OAuth (no manual key paste). Done.
+
+**Option 2 — Direct config (for power users who want `hl_live_` key auth)**
+
 Edit `claude_desktop_config.json`:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -23,11 +40,14 @@ Edit `claude_desktop_config.json`:
 {
   "mcpServers": {
     "hooklayer": {
-      "url": "https://hooklayer.dev/api/mcp",
-      "transport": "http",
-      "headers": {
-        "Authorization": "Bearer hl_live_..."
-      }
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://hooklayer.dev/api/mcp",
+        "--header",
+        "Authorization:Bearer hl_live_..."
+      ]
     }
   }
 }
@@ -63,6 +83,34 @@ In your workflow, add an **MCP Client** node and configure as a remote HTTP MCP 
 - Header: `Authorization: Bearer hl_live_...`
 
 All 7 tools appear in the node's "Tool" dropdown.
+
+### OAuth 2.1 + PKCE (for Claude.ai connector + custom apps)
+
+Hooklayer is fully OAuth 2.1 compliant — discovery, Dynamic Client Registration, PKCE, refresh token rotation. MCP clients that prefer OAuth over API keys work out of the box.
+
+Discovery endpoints (no auth required, machine-readable):
+
+```bash
+# Authorization server metadata (RFC 8414)
+curl https://hooklayer.dev/.well-known/oauth-authorization-server
+
+# Protected resource metadata (RFC 9728)
+curl https://hooklayer.dev/.well-known/oauth-protected-resource
+```
+
+Dynamic Client Registration (create a client without a manual signup form):
+
+```bash
+curl -X POST https://hooklayer.dev/oauth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_name": "Your MCP client",
+    "redirect_uris": ["https://yourapp.com/oauth/callback"]
+  }'
+# Returns: client_id, client_secret (for confidential clients)
+```
+
+Hitting `tools/call` without auth returns `401` plus a `WWW-Authenticate` header pointing at the resource metadata — Claude.ai, Cursor, and other MCP clients use this to auto-discover the OAuth flow.
 
 ### Other clients
 
@@ -177,7 +225,8 @@ Source code for the hosted server lives at `hooklayer.dev` (closed source — th
 - **Full docs**: https://hooklayer.dev/docs
 - **Playground (no signup)**: https://hooklayer.dev/playground
 - **Pricing**: https://hooklayer.dev/pricing
-- **Discord**: (coming soon)
+- **OAuth metadata**: [`/.well-known/oauth-authorization-server`](https://hooklayer.dev/.well-known/oauth-authorization-server)
+- **Issues + bug reports**: [GitHub Issues](https://github.com/khan-ashifur/hooklayer/issues)
 
 ---
 

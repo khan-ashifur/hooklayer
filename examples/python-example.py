@@ -49,15 +49,30 @@ async def main() -> None:
             )
 
             payload = json.loads(analysis.content[0].text)
-            print(f"✓ Viral DNA score: {payload['viral_dna']['viral_dna_score']}")
-            print(f"  Recommended chain: {len(payload['recommended_chain'])} steps")
+            score = payload.get("viral_dna", {}).get("viral_dna_score", "n/a")
+            print(f"✓ Viral DNA score: {score}")
 
-            # 3. Fire the recommended_chain automatically
-            for step in payload["recommended_chain"]:
+            chain = payload.get("recommended_chain") or []
+            if not chain:
+                print("  (no recommended_chain returned — likely a very small account)")
+                return
+
+            print(f"  Recommended chain: {len(chain)} steps")
+
+            # 3. Fire the recommended_chain automatically.
+            # Some steps have placeholder params (<<<USER_DRAFT>>>, <<<USER_HOOK>>>,
+            # <<<USER_SCRIPT>>>) the calling agent should substitute.
+            for step in chain:
+                params = dict(step["params"])
+                if isinstance(params.get("draft"), str) and "<<<USER_DRAFT>>>" in params["draft"]:
+                    params["draft"] = "I tracked where every hedge fund moved money this week"
+                if isinstance(params.get("text"), str) and "<<<USER_HOOK>>>" in params["text"]:
+                    params["text"] = "3 things I wish I knew about scaling B2B SaaS"
+                if isinstance(params.get("script"), str) and "<<<USER_SCRIPT>>>" in params["script"]:
+                    params["script"] = "I tested 3 cold-email tools so you don't have to. Here's the winner..."
+
                 print(f"\n→ {step['tool']} (reason: {step['reason']})")
-                result = await session.call_tool(
-                    step["tool"], arguments=step["params"]
-                )
+                result = await session.call_tool(step["tool"], arguments=params)
                 if result.isError:
                     print(f"  ✗ {result.content[0].text}")
                 else:

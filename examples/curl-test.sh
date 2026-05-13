@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Hooklayer MCP — raw JSON-RPC tests via curl
 #
+# Requires: bash, curl, jq
+#   macOS:  brew install jq
+#   Debian: apt-get install jq
+#   Win:    scoop install jq   (or use Git Bash)
+#
 # Run:
 #   export HOOKLAYER_API_KEY=hl_live_...
 #   bash curl-test.sh
