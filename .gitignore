@@ -37,3 +37,7 @@ venv/
 # Test outputs / scratch
 *.log
 .tmp_*
+
+# Official Registry publisher binary (not part of the source — re-downloaded locally)
+mcp-publisher
+mcp-publisher.exe
