@@ -6,10 +6,10 @@
 [![Tools](https://img.shields.io/badge/MCP%20Tools-7-7c3aed)](https://hooklayer.dev/docs)
 [![OAuth](https://img.shields.io/badge/OAuth-2.1%20%2B%20PKCE-blue)](https://hooklayer.dev/.well-known/oauth-authorization-server)
 
-**Viral-content intelligence for AI agents.** Drop the Hooklayer MCP server into Claude Desktop, Cursor, n8n, or any HTTP MCP client and your agent gets 7 callable tools for scoring hooks, remixing viral videos, surfacing live trends, and (the flagship) analyzing TikTok creators with a `recommended_chain` that pre-fills the next 3 tool calls.
+**Viral-content intelligence for AI agents.** Drop the Hooklayer MCP server into Claude Desktop, Cursor, n8n, or any HTTP MCP client and your agent gets 7 read-only tools for scoring hooks, remixing viral videos, surfacing live trends, and analyzing TikTok creators. The flagship `analyze_account` tool includes a `recommended_chain` field with suggested follow-up calls the agent can review and execute.
 
 ```
-1 call in → 4 calls out → fully agentic chain → zero prompt engineering
+7 read-only tools · all return structured JSON · no mutations · no side effects
 ```
 
 ---
@@ -43,7 +43,7 @@ Edit `claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y",
-        "mcp-remote",
+        "mcp-remote@0.1.38",
         "https://hooklayer.dev/api/mcp",
         "--header",
         "Authorization:Bearer hl_live_..."
@@ -129,7 +129,7 @@ curl -X POST https://hooklayer.dev/api/mcp \
 
 | Tool | Credits | What it does |
 |---|---|---|
-| **`analyze_account`** | 5 | TikTok creator deep dive: viral DNA scores, format fingerprint, top 5 videos, content gaps, **`recommended_chain`** with pre-filled next-tool calls. The agentic anchor. |
+| **`analyze_account`** | 5 | TikTok creator deep dive: viral DNA scores, format fingerprint, top 5 videos, content gaps, **`recommended_chain`** with suggested follow-up tools. |
 | `score_hook` | 1 | Score any hook 0-100 against proven viral patterns. Returns 3 rewrites at higher quality. |
 | `viral_remix` | 3 | URL or transcript → fresh script with mirrored viral DNA. Scene-by-scene with camera shots. |
 | `trend_pulse` | 1 | Real-time rising opportunities + saturated patterns per niche. 12-hour cache. |
@@ -141,9 +141,9 @@ Full schemas + curl examples: **https://hooklayer.dev/docs**
 
 ---
 
-## 💡 The agentic-chain pattern
+## 💡 The recommended-chain pattern
 
-`analyze_account` returns a `recommended_chain` field that tells your agent exactly which tools to call next, with parameters pre-filled:
+`analyze_account` returns a `recommended_chain` field with suggested follow-up tools and pre-filled parameters. The agent decides whether and when to execute them:
 
 ```json
 {
@@ -172,7 +172,7 @@ Full schemas + curl examples: **https://hooklayer.dev/docs**
 }
 ```
 
-Claude reads this and chains the next 3 tools automatically. No prompt engineering, no glue code.
+The agent can review these suggestions and call the recommended tools if appropriate. Each tool still requires explicit invocation — nothing runs automatically without agent/user consent.
 
 ---
 
@@ -227,6 +227,20 @@ Source code for the hosted server lives at `hooklayer.dev` (closed source — th
 - **Pricing**: https://hooklayer.dev/pricing
 - **OAuth metadata**: [`/.well-known/oauth-authorization-server`](https://hooklayer.dev/.well-known/oauth-authorization-server)
 - **Issues + bug reports**: [GitHub Issues](https://github.com/khan-ashifur/hooklayer/issues)
+
+---
+
+## 🔒 Security
+
+**All 7 tools are read-only.** They analyze, score, and generate content — none of them create, modify, or delete any user data, accounts, or external resources. Every tool carries `readOnlyHint: true` and `destructiveHint: false` in its MCP annotations.
+
+**Authentication:** `tools/call` requires a Bearer token (`hl_live_*` API key or OAuth 2.1 access token). Public methods (`initialize`, `ping`, `tools/list`) work without auth so MCP clients can handshake and discover tools before authentication.
+
+**`recommended_chain` is advisory only.** The `analyze_account` response includes suggested follow-up tools with pre-filled parameters. These are data — the agent and user decide whether to execute them. No tool call ever triggers additional tool calls server-side.
+
+**Data handling:** Hooklayer processes the inputs you send (handles, hooks, scripts, URLs) to return analysis results. We do not store your content beyond the request lifecycle except for anonymous usage metrics.
+
+To report a security issue: [GitHub Issues](https://github.com/khan-ashifur/hooklayer/issues) or email security@hooklayer.dev.
 
 ---
 
