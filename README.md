@@ -1,6 +1,7 @@
 # Hooklayer MCP
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.1.0-7c3aed)](CHANGELOG.md)
 [![MCP](https://img.shields.io/badge/MCP-2024--11--05-7c3aed)](https://modelcontextprotocol.io)
 [![Production](https://img.shields.io/badge/Status-Production%20Ready-success)](https://hooklayer.dev)
 [![Tools](https://img.shields.io/badge/MCP%20Tools-7-7c3aed)](https://hooklayer.dev/docs)
@@ -11,6 +12,8 @@
 ```
 7 read-only tools · all return structured JSON · no mutations · no side effects
 ```
+
+> **v1.1.0 (2026-05-14):** The evidence layer ships. Every score includes `signals[]` with cited evidence, a `would_fail_because` counterfactual, and a `quality` health field. `predict_virality` runs an independent adversarial check. `analyze_account.recommended_chain` steps now expose `confidence`, `cost`, `action_class` (authority taxonomy), and `expected_output`. See [CHANGELOG.md](CHANGELOG.md) for the full ship.
 
 ---
 
