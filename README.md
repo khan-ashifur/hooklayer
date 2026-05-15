@@ -6,6 +6,7 @@
 [![Production](https://img.shields.io/badge/Status-Production%20Ready-success)](https://hooklayer.dev)
 [![Tools](https://img.shields.io/badge/MCP%20Tools-7-7c3aed)](https://hooklayer.dev/docs)
 [![OAuth](https://img.shields.io/badge/OAuth-2.1%20%2B%20PKCE-blue)](https://hooklayer.dev/.well-known/oauth-authorization-server)
+[![smithery badge](https://smithery.ai/badge/io.github.khan-ashifur/hooklayer)](https://smithery.ai/server/io.github.khan-ashifur/hooklayer)
 
 **Viral-content intelligence for AI agents.** Drop the Hooklayer MCP server into Claude Desktop, Cursor, n8n, or any HTTP MCP client and your agent gets 7 read-only tools for scoring hooks, remixing viral videos, surfacing live trends, and analyzing TikTok creators. The flagship `analyze_account` tool includes a `recommended_chain` field with suggested follow-up calls the agent can review and execute.
 
